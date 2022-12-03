@@ -76,6 +76,12 @@ int requestFile(int sockfd, char * ip, int port, char * path) {
 
     saveFile(dataSockfd, "OLA.txt"); // get FILENAME
 
+    int rZide = readResponse(sockfd, &response); // TODO ::: APARECE UMAS RESPOSTAS REPETIDAS EM ALGUNS SITIOS....ver dps
+    if (response.code != TRANSFER_COMPLETE) // TODO: PERGUNTAR AO STOR O PK DA NOTA DOS SLIDES
+    {
+        perror("Error closing data connection");
+        return -1;
+    }
 
     if (close(dataSockfd) < 0) {
         perror( "Error closing data socket!\n");
