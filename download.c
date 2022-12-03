@@ -1,13 +1,22 @@
 #include <stdio.h>
 #include "URL.h"
 
-int main(void)
+int main(int argc, char * argv[])
 {
-    const char text[] = "ftp://user:passs@cboard.cprogramming.com/ola/online.php";
+    if (argc != 2) {
+        fprintf(stderr, "usage: ./download ftp://[<user>:<password>@]<host>/<url-path>\n");
+        exit(1);
+    }
     
     url urlStruct;
 
-    parseURL(text, &urlStruct);
+    if (parseURL(argv[1], &urlStruct) != 0) {
+        fprintf(stderr, "There was an error passing the url");
+        exit(1);
+    }
+
+    
+    
 
     return 0;
 
