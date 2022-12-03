@@ -128,7 +128,7 @@ int login(int sockFd, char *user, char *password) {
 
     if (sendCommand(sockFd, &cmd) < 0)
     {
-        perror("Error sending USER cmd");
+        perror("Error sending PASS cmd");
         return -1;
     }
     
@@ -159,7 +159,7 @@ int passiveMode(int sockFd, sockResponse * response) {
     
     if (response->code != ENTERING_PASSIVE_MODE)
     {
-        perror("Error entering passive mode");
+        perror("Error entering PASSIVE mode");
         return -1;
     }
     
