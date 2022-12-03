@@ -13,6 +13,12 @@ int downloadFile(url * urlStruct) {
     sockResponse response;
     int size = readResponse(sockfd, &response);
     
+    if (response.code != SERVICE_READY_FOR_NEW_USER) {
+        printf("Error: %s when trying to\n", response.response);
+        return -1;
+    }
+
+    
 
     
     return 0;

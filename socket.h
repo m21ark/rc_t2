@@ -9,7 +9,8 @@
 #include <unistd.h>
 #include <errno.h> 
 #include <netdb.h>
-
+#include <sys/types.h>
+#include <string.h>
 
 typedef struct {
     char ip[20]; // TO USE IN PASSIVE
@@ -17,10 +18,17 @@ typedef struct {
     int code;
 } sockResponse;
 
-int openConnection(const char *host, const char *port);
+typedef struct {
+    char command[5];
+    char argument[2048];
+} sockCommand;
+
+int openConnection(const char *host, int port);
 
 int getIpFromHost(const char *host, char *ip);
 
-int readResponse(int sockFd, sockResponse * response); 
+int readResponse(int sockFd, sockResponse * response);
+
+int sendCommand(int sockFd, sockCommand * command);
 
 #endif

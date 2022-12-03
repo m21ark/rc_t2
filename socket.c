@@ -1,6 +1,6 @@
 #include "socket.h"
 
-int openConnection(const char *host, const char *port) {
+int openConnection(const char *host, int port) {
 
     int sockfd;
     struct sockaddr_in server_addr;
@@ -10,6 +10,8 @@ int openConnection(const char *host, const char *port) {
     char ip[33];
 
     getIpFromHost(host, ip);
+
+    printf("IP: %s\n", ip);
 
     bzero((char *) &server_addr, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
@@ -32,7 +34,7 @@ int openConnection(const char *host, const char *port) {
     return sockfd;
 }
 
-int getIpFromHost(const char *host, char *ip)
+inline int getIpFromHost(const char *host, char *ip)
 {
     struct hostent *h;
 
@@ -41,7 +43,11 @@ int getIpFromHost(const char *host, char *ip)
         return -1;
     }
 
-    *ip = inet_ntoa(*((struct in_addr *) h->h_addr));
+    char * tmp;
+    tmp = inet_ntoa(*((struct in_addr *) h->h_addr));
+    strcpy(ip, tmp);
+    printf("\nIP: %s", ip);
+
     return 0;
 }
 
@@ -53,7 +59,6 @@ int readResponse(int sockFd, sockResponse * response) {
     size_t bytesRead = 0;
 	int totalBytesRead = 0;
 
-	// Reads response line by line. Stops when the line is "<code> "
 	while (getline(&buf, &bytesRead, socket) > 0) {
 		strncat(response->response, buf, bytesRead - 1);
 		totalBytesRead += bytesRead;
@@ -64,9 +69,25 @@ int readResponse(int sockFd, sockResponse * response) {
 		}
     }
 
-	free(buf);
-
-	printf("< %s", response->response);
-
     return totalBytesRead;
+}
+
+
+int sendCommand(int sockFd, sockCommand * command) {
+    FILE * socket = fdopen(sockFd, "w");
+
+    char buf[1024];
+    strcpy(buf, command->command);
+    strcat(buf, " ");
+    strcat(buf, command->argument);
+
+    int bytes = write(sockFd, buf, strlen(buf));
+    if (bytes != strlen(buf)) {
+        perror("write()");
+        return -1;
+    }
+    
+    printf("Sent: %s\n", buf);
+
+    return bytes;
 }

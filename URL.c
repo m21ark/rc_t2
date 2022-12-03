@@ -41,8 +41,6 @@ int parseURL(const char *urlString, url *urlStruct)
         }
     }
 
-    printf(urlStruct->host);
-
     regfree(&regexCompiled);
     return 0;
 }
