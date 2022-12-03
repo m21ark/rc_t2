@@ -105,22 +105,35 @@ int login(int sockFd, char *user, char *password) {
         return -1;
     }
 
-
     // ./download ftp://anonymous:pass@ftp.up.pt/pub/kodi/timestamp.txt
     sockResponse sockRes;
     readResponse(sockFd, &sockRes);
     
     if (!(sockRes.code == USERNAME_OK_GIVE_PASSWORD || sockRes.code == LOGIN_SUCCESSFUL))
     {
-        printf("Please specify a valid Username");
+        perror("Please specify a valid Username");
         return -1;
     }
 
     //SEND PASS COMMAND
 
+    strcpy(cmd.command, PASS);
+    strcpy(cmd.argument, password);
 
+    if (sendCommand(sockFd, &cmd) < 0)
+    {
+        perror("Error sending USER cmd");
+        return -1;
+    }
     
+    readResponse(sockFd, &sockRes);
 
+    if (sockRes.code != LOGIN_SUCCESSFUL)
+    {
+        perror("Please specify a valid Username");
+        return -1;
+    }
+        
 
     return 0;
 }
