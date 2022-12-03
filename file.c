@@ -10,9 +10,12 @@ int downloadFile(url * urlStruct) {
         return -1;
     }
     
-
+    sockResponse response;
+    int size = readResponse(sockfd, &response);
     
 
+    
+    return 0;
 }
 
 

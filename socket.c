@@ -45,3 +45,28 @@ int getIpFromHost(const char *host, char *ip)
     return 0;
 }
 
+
+int readResponse(int sockFd, sockResponse * response) {
+    FILE * socket = fdopen(sockFd, "r");
+
+    char * buf;
+    size_t bytesRead = 0;
+	int totalBytesRead = 0;
+
+	// Reads response line by line. Stops when the line is "<code> "
+	while (getline(&buf, &bytesRead, socket) > 0) {
+		strncat(response->response, buf, bytesRead - 1);
+		totalBytesRead += bytesRead;
+
+		if (buf[3] == ' ') {
+			sscanf(buf, "%d", &response->code);
+			break;
+		}
+    }
+
+	free(buf);
+
+	printf("< %s", response->response);
+
+    return totalBytesRead;
+}

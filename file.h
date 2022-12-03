@@ -6,6 +6,8 @@
 #include "FTP_macros.h"
 #include "socket.h"
 
+
+
 int downloadFile(url * urlStruct);
 
 

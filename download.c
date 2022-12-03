@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "URL.h"
+#include "file.h"
 
 int main(int argc, char * argv[])
 {
@@ -15,7 +16,12 @@ int main(int argc, char * argv[])
         exit(1);
     }
 
-    
+    printf("HOST: %s", urlStruct.host);
+    if (downloadFile(&urlStruct) != 0)
+    {
+        fprintf(stderr, "Something failed when downloading file");
+        exit(1);
+    }
     
 
     return 0;
