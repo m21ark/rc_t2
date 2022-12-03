@@ -65,6 +65,12 @@ int readResponse(int sockFd, sockResponse * response) {
 
 		if (buf[3] == ' ') {
 			sscanf(buf, "%d", &response->code);
+            if (response->code == ENTERING_PASSIVE_MODE) {
+                int p1, p2, p3, p4, p5, p6;
+                sscanf(buf,"227 Entering Passive Mode (%d,%d,%d,%d,%d,%d[^ .)\n]", &p1, &p2, &p3, &p4, &p5, &p6);
+                sprintf(response->ip, "%d.%d.%d.%d", p1, p2, p3, p4);
+                response->port = p5 * 256 + p6;
+            }
 			break;
 		}
     }
@@ -135,6 +141,28 @@ int login(int sockFd, char *user, char *password) {
     }
         
 
+    return 0;
+}
+
+int passiveMode(int sockFd, sockResponse * response) {
+
+    sockCommand cmd = {PASV, ""};
+
+    if (sendCommand(sockFd, &cmd) < 0)
+    {
+        perror("Error sending PASSIVE cmd");
+        return -1;
+    }
+
+
+    readResponse(sockFd, response);
+    
+    if (response->code != ENTERING_PASSIVE_MODE)
+    {
+        perror("Error entering passive mode");
+        return -1;
+    }
+    
     return 0;
 }
 

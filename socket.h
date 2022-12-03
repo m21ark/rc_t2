@@ -15,6 +15,7 @@
 
 typedef struct {
     char ip[20]; // TO USE IN PASSIVE
+    int port; // TO USE IN PASSIVE
     char response[2048];
     int code;
 } sockResponse;
@@ -33,5 +34,7 @@ int readResponse(int sockFd, sockResponse * response);
 int sendCommand(int sockFd, sockCommand * command);
 
 int login(int sockFd, char *user, char *password);
+
+int passiveMode(int sockFd, sockResponse * response);
 
 #endif

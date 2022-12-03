@@ -8,6 +8,9 @@ int parseURL(const char *urlString, url *urlStruct)
     regmatch_t groupArray[maxGroups];
     int reti;
     char *re = "ftp://(([a-z0-9]+):([a-z0-9]+)@)?([\\.a-z0-9]+)/([\\./a-z0-9]+)$";
+    // TODO: neste momento se n for dado o nome e a pass nenhum grupo é bem capturado... temos de mudar isso
+    // ou vendo se é possível através do regex ou vendo se na string tem um @ e assim mudar re para outra expressão
+    // Tb se pode perguntar ao stor se é mesmo necessário mudar ou n mas en princípio sim
 
     if (regcomp(&regexCompiled, re, REG_EXTENDED))
     {
