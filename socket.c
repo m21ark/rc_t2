@@ -68,7 +68,7 @@ int readResponse(int sockFd, sockResponse * response) {
 			break;
 		}
     }
-
+    printf("%s", response->response);
     return totalBytesRead;
 }
 
@@ -80,6 +80,7 @@ int sendCommand(int sockFd, sockCommand * command) {
     strcpy(buf, command->command);
     strcat(buf, " ");
     strcat(buf, command->argument);
+    strcat(buf, CRLF);
 
     int bytes = write(sockFd, buf, strlen(buf));
     if (bytes != strlen(buf)) {
@@ -87,7 +88,40 @@ int sendCommand(int sockFd, sockCommand * command) {
         return -1;
     }
     
-    printf("Sent: %s\n", buf);
+    printf("Sent: %s", buf);
 
     return bytes;
 }
+
+int login(int sockFd, char *user, char *password) {
+
+    // SEND USER COMMAND
+    sockCommand cmd = {USER, ""};
+    strcpy(cmd.argument, user);
+
+    if (sendCommand(sockFd, &cmd) < 0)
+    {
+        perror("Error sending USER cmd");
+        return -1;
+    }
+
+
+    // ./download ftp://anonymous:pass@ftp.up.pt/pub/kodi/timestamp.txt
+    sockResponse sockRes;
+    readResponse(sockFd, &sockRes);
+    
+    if (!(sockRes.code == USERNAME_OK_GIVE_PASSWORD || sockRes.code == LOGIN_SUCCESSFUL))
+    {
+        printf("Please specify a valid Username");
+        return -1;
+    }
+
+    //SEND PASS COMMAND
+
+
+    
+
+
+    return 0;
+}
+

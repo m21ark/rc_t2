@@ -11,6 +11,7 @@
 #include <netdb.h>
 #include <sys/types.h>
 #include <string.h>
+#include "FTP_macros.h"
 
 typedef struct {
     char ip[20]; // TO USE IN PASSIVE
@@ -30,5 +31,7 @@ int getIpFromHost(const char *host, char *ip);
 int readResponse(int sockFd, sockResponse * response);
 
 int sendCommand(int sockFd, sockCommand * command);
+
+int login(int sockFd, char *user, char *password);
 
 #endif

@@ -18,7 +18,10 @@ int downloadFile(url * urlStruct) {
         return -1;
     }
 
-    
+    if (login(sockfd, urlStruct->user, urlStruct->password) < 0) {
+        printf("Error in login\n");
+        return -1;
+    }
 
     
     return 0;
