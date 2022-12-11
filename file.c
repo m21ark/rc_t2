@@ -93,16 +93,17 @@ int requestFile(int sockfd, char * ip, int port, char * path) {
 
 int saveFile(int dataSockfd, char * filename) {
     int fd;
-    if ((fd = open(filename, O_WRONLY | O_CREAT)) < 0) {
+    if ((fd = open(filename, O_WRONLY | O_CREAT, 0777)) < 0) {
         perror("Error creating or opening the file");
         return -1;
     }
 
-    // TODO : salvar no ficheiro criado/aberto
-    sockResponse response; // AQUI N CONVÉM USAR O response por causa do tamanho do ficheiro
-    int size = readResponse(dataSockfd, &response); // AQUI N CONVÉM USAR O response por causa do tamanho do ficheiro
+    char buffer[1024];
+    int size;
+    while ((size = read(dataSockfd, buffer, 1024)) > 0) {
+        write(fd, buffer, size);
+    }
 
-    printf("------------------\n%s\n------------------\n", response.response);
 
     if (close(fd) < 0) {
         perror("Error closing File!\n");
