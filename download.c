@@ -12,7 +12,7 @@ int main(int argc, char * argv[])
     url urlStruct;
 
     if (parseURL(argv[1], &urlStruct) != 0) {
-        fprintf(stderr, "There was an error passing the url");
+        fprintf(stderr, "There was an error parssing the url");
         exit(1);
     }
 

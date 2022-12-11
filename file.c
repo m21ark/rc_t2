@@ -74,10 +74,12 @@ int requestFile(int sockfd, char * ip, int port, char * path) {
     fflush(stdout);
     printf("Downloading file...\n");
 
-    saveFile(dataSockfd, "OLA.txt"); // get FILENAME
+    char filename[1024];
+    getFileName(path, filename);
+    saveFile(dataSockfd, filename);
 
-    int rZide = readResponse(sockfd, &response); // TODO ::: APARECE UMAS RESPOSTAS REPETIDAS EM ALGUNS SITIOS....ver dps
-    if (response.code != TRANSFER_COMPLETE) // TODO: PERGUNTAR AO STOR O PK DA NOTA DOS SLIDES
+    int rZide = readResponse(sockfd, &response); 
+    if (response.code != TRANSFER_COMPLETE) 
     {
         perror("Error closing data connection");
         return -1;
@@ -113,9 +115,17 @@ int saveFile(int dataSockfd, char * filename) {
 
 int getFileName(char * path, char * filename) {
 
-    // Get filename from path
+    //Get the last '/' in the path
+    char * lastSlash = strrchr(path, '/');
 
-    // TODO: IR BUSCAR O NOME DO FILE AO PATH para guardar com o mesmo nome no diretório do utilizador
+    if (lastSlash == NULL) {
+        strcpy(filename, path); // No '/' in the path, so the filename is the path
+        return 0;
+    }
+
+    // Get the filename
+    strcpy(filename, lastSlash + 1);
+
     return 0;
 }
 
