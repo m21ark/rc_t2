@@ -110,8 +110,7 @@ int login(int sockFd, char *user, char *password) {
         perror("Error sending USER cmd");
         return -1;
     }
-
-    // ./download ftp://anonymous:pass@ftp.up.pt/pub/kodi/timestamp.txt
+    
     sockResponse sockRes;
     readResponse(sockFd, &sockRes);
     
