@@ -106,6 +106,9 @@ Configurar rotas default:
 		> route add default gw 172.16.Y0.254 (ou seja mandar para o tux4 -> intermédio para chegar à subrede da bridge21 onde está tux2 e RC)	
 		> route add -net 172.16.<SALA_N>.0/24 gw 172.16.Y0.254 (ou seja mandar para tux4 como intermédio para chegar à subrede ligada à internet)
 		--> foi este que adicionamos na outra aula q faltava!	
+	
+	tux4:
+		route add default gw 172.16.31.254
 		
 No RC (Router Comercial):
 	- ligar a ETH1 ao 2.1 (nas portas de cima)
@@ -134,7 +137,7 @@ Configurar a rota no RC GTK:
 	(Ou seja, do router, para chegar à subrede da bridgeY0, manda pelo tuxY4)
 	
 	TALVEZ FALTE AQUI UMA ROUTE DEFAULT PARA LIGAR À WEB! SLIDE 50:
-		– /ip route add dst-address=0.0.0.0/0 gateway=172.16.1.254
+		– /ip route add dst-address=0.0.0.0/0 gateway=172.16.<SALA_N>.254
 	
 	Para ver configuração de routes:
 		> /ip route print
