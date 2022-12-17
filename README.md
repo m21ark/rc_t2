@@ -1,1 +1,257 @@
-# rc_t2
+# Trabalho 2 - Resumo
+
+## Ligação de cabos
+
+LIGAR OS CABOS
+
+# Reconexão à internet no fim das aulas
+
+Basta ligar uma comunicação da porta Y.1 em cima a uma porta qualquer do switcher e depois limpar as configuracoes que fizemos na aula tanto no pc como no switch!
+
+## Exp 1-4
+
+Para mudar de tux: 
+	scroll-lock 2x → Kbd starts blinking → keypad num (2,3,4) → Enter
+
+Fazer reset de tudo em todos os tux:
+	> service networking restart
+	ou
+	> systemctl restart networking
+
+Fazer reset do router (tux4):
+	Baudrate: GTK <-- 115200
+	GTK Login --> user: admin | pass: NOTHING
+
+	> /system reset-configuration
+
+Configuração de IPs:
+
+	Para ver configurações: 
+		> ifconfig
+
+	tux2:
+		> ifconfig eth0 172.16.Y1.1/24
+		
+	tux3:
+		> ifconfig eth0 172.16.Y0.1/24
+		
+	tux4:
+		> ifconfig eth0 172.16.Y0.254/24
+		
+		> ifconfig eth1 172.16.Y1.253/24
+
+Configuração extra no tux4:
+	Enable IP forwarding (NECESSÁRIO):
+		echo 1 > /proc/sys/net/ipv4/ip_forward
+	Disable ICMP echo ignore broadcast (DESNECESSÁRIO):
+		echo 0 > /proc/sys/net/ipv4/icmp_echo_ignore_broadcasts
+
+Remover da ARP table (em princípio não precisamos): 
+	> arp –d <DESIRED_IP>
+
+Criação de bridges:
+
+	Lista:
+		- bridge Y0: tux3 , tux4 (eth0)
+		- bridge Y1: tux2 , tux4 (eth1)
+		
+	No GTK (tux4):
+	
+		Para ver as bridges e portas:
+			> /interface bridge print
+			> /interface bridge port print
+			> /interface bridge port print brief
+			
+		Para apagar bridge:
+			> /interface bridge remove <bridge_name>
+
+		Criar bridges novas bridgeY0 e bridgeY1:
+			> /interface bridge add name=bridgeY0
+			> /interface bridge add name=bridgeY1
+
+		Remover portas das bridges default de todos os tux:
+			> /interface bridge port remove [find interface =ether<X>]
+				x --> X é a porta a piscar no switch ligada aos tux E0
+		
+		Adicionar agr os tux as bridges corretas:
+			> /interface bridge port add bridge=bridgeY1 interface=ether<TUX2_X>
+			> /interface bridge port add bridge=bridgeY0 interface=ether<TUX3_X>
+			
+			> /interface bridge port add bridge=bridgeY0 interface=ether<TUX4_X_ETH0>
+			> /interface bridge port add bridge=bridgeY1 interface=ether<TUX4_X_ETH1>
+			
+	
+Criação de routes:
+	
+	Ver a tabela de routes:
+		> route -n
+	
+	Caso seja preciso remover rota de tux:
+		> route del -net <subrede_destino>/24 gw <ip_forward_intermédio>
+	
+	Para adicionar uma nova rota num tux:	
+		> route add -net <IP DA SUBREDE DE DESTINO>/24 gw <IP_GATEWAY INTERMEDIA>
+
+	No tux2:
+		> route add -net 172.16.Y0.0/24 gw 172.16.Y1.253
+	
+	No tux3:
+		> route add -net 172.16.Y1.0/24 gw 172.16.Y0.254
+
+Configurar rotas default:
+	tux2:
+		> route add default gw 172.16.Y1.254 (ou seja mandar tudo para o router)
+		
+	tux3:
+		> route add default gw 172.16.Y0.254 (ou seja mandar para o tux4 -> intermédio para chegar à subrede da bridge21 onde está tux2 e RC)	
+		> route add -net 172.16.<SALA_N>.0/24 gw 172.16.Y0.254 (ou seja mandar para tux4 como intermédio para chegar à subrede ligada à internet)
+		--> foi este que adicionamos na outra aula q faltava!	
+	
+	tux4:
+		route add default gw 172.16.Y1.254
+		
+No RC (Router Comercial):
+	- ligar a ETH1 ao 2.1 (nas portas de cima)
+	- ligar a ETH2 a uma porta do switcher qualquer (escolhemos a porta 15)
+
+Agora temos de adicionar a porta 15 (ou seja o RC) à bridge21:
+	/interface bridge port remove [find interface =ether15]
+	/interface bridge port add bridge=bridgeY1 interface=ether15
+
+
+Tirar o cabo q liga ao switcher e ligá-lo ao ROUTER MT (linha de cima à direita). 
+TER MTO CUIDADO SE ESTAMOS A CONFIGURAR O SWITCHER OU O ROUTER.
+NÃO DA PARA VER EM QUAL ESTAMOS A CONFIGURAR NO GTK ENT ATENTO AO CABO! 
+
+
+Configurar os IP do Router (RC) no GTK (slide 50):
+	> /ip address add address=172.16.<SALA_N>.Y9/24 interface=ether1
+	> /ip address add address=172.16.Y1.254/24 interface=ether2
+		--> SALA_N = 1 na sala habitual e SALA_N = 2 na outra
+	
+	Para ver configuração IP:
+		> /ip address print
+
+Configurar a rota no RC GTK:
+	> /ip route add dst-address=172.16.Y0.0/24 gateway=172.16.Y1.253
+	(Ou seja, do router, para chegar à subrede da bridgeY0, manda pelo tuxY4)
+	
+	TALVEZ FALTE AQUI UMA ROUTE DEFAULT PARA LIGAR À WEB! SLIDE 50:
+		– /ip route add dst-address=0.0.0.0/0 gateway=172.16.<SALA_N>.254
+	
+	Para ver configuração de routes:
+		> /ip route print
+	
+	Para apagar uma route:
+		> /ip route remove numbers=<number_from_print_listing>
+		
+Caso queiramos desativar redirects no tux2:
+	echo 0 > /proc/sys/net/ipv4/conf/eth0/accept_redirects
+	echo 0 > /proc/sys/net/ipv4/conf/all/accept_redirects
+	
+	Para ativar é só fazer: 
+		echo 1 > ...
+
+
+### Pergunta do stor
+	Caso apaguemos a rota do tux2 para chegar à subde do tux3,
+	ele vai mandar tudo para a rota default, ou seja o RC, que caso tenha rota definida pelo tux4 para chegar a tux3, vai fazer o devido envio (ou seja é tomado um caminho menos eficiente usando RC para o efeito).
+	O rc, que ainda possui o 4.253, por sua vez avisa o 2 com REDIRECT (**protocolo ICMP**) que ele podia mandar para 4.253 (rota mais eficiente) sem usar o RC como intermédio.
+	Caso o tux2 tenha accept_redirects ativo, o RC vai avisar o tux2 para adicionar à sua tabela de rotas o caminho para tux3 pelo tux4 evitando um hoop desnecessário pelo RC.
+	Podemos usar traceroute 172.16.20.1 a partir do tux2. Isto efetivamente apenas faz um ping ao tux3 mas vemos o percurso do pacote que pode ser tux2-->tux4-->tux3 caso tux2 tenha na sua tabela a rota definida. Caso não: tux2-->RC-->tux4-->tux3.
+	Ao desligar o ACCEPT_REDIRECT o 2 vai deixar de ligar a essas info do RC de melhores rotas.
+	
+## Exp 5
+
+Configurar DNS em todos os tux:
+	nano  /etc/resolv.conf
+		--> escrever lá 172.16.1.1 (na sala 1)
+		--> escrever lá 172.16.2.1 (na sala 2)
+
+### Pergunta do stor	
+se desativasse a NAT no RC, e tivesse de fazer ping de tux3 para o IP da rede do laboratorio --> 
+	- há echo request
+	- mas não há echo reply
+
+
+## Exp 6
+
+Tentar fazer ping no tux3 de um endereço da web como por exemplo 8.8.8.8.
+O caminho expectável é tux3 --> tux4 --> RC --> Internet 
+
+Estando tudo a dar, basta agora usar a nossa aplicação para baixar algo da rede para este tux.
+
+### Pergunta do stor
+
+Se tentarmos baixar algo grande num único tux, é expectável que a taxa de transferência vá aumentando até estabilizar (com ligeiras variações) numa velocidade limite e depois, perto do fim, diminui até terminar.
+
+Caso se tente baixar para o tux3 e para o tux2 em simultâneo, estes vão competir pelos recursos de transferência. Assim, o aumento de velocidade inicial será menos pronunciado e haverá uma maior oscilação de velocidade acabando por oscilar em torno de um valor inferior ao valor que teria estabilizado se fosse apenas um único tux a baixar o ficheiro.
+
+## Conceitos chave
+
+
+### ARP -> Address Translation Protocol:
+
+ARP (Address Resolution Protocol) serves the purpose of converting IP addresses (used by Layer 3) into MAC addresses (used by Layer 2).
+Isto é imporante porque o layer 2 usa MAC e não percebe/reconhece o que são endereços IP (ARP assemelha-se ao DNS mas para o layer 2).
+
+Ao fazer ping, se a ARP table estiver limpa, são trocados 2 pacotes ARP para fazer set do MAC de destino. Depois os restantes pacotes são de comunicação.
+	2 pacotes trocados:
+		- O emissor pede (em brodcast) ao IP de destino para se manifestar e dizer o seu MAC.
+		- Pc com IP que foi chamado partilha o seu MAC com toda a gente.
+
+Comandos ARP:
+	listagem: 
+		> arp –a
+	apagar:
+		> arp –d <ip_address>
+
+
+### DNS -> Domain Name System
+
+DNS serve para converter URLs para endereços IP que podem ser usados pelo layer 3.
+
+### NAT -> Network address translation:
+
+Faz a conversão no router entre endereços da Internet e endereços de redes locais.
+
+Disable default NAT no GTK:
+	/ip firewall nat disable 0
+
+Enable NAT rules no GTK:
+	/ip firewall nat add chain=srcnat action=masquerade out-interface=ether1
+
+#### ICMP -> Internet Control Message Protocol
+
+As mensagens ICMP geralmente são enviadas automaticamente em uma das seguintes situações:
+	- Um pacote IP não consegue chegar ao seu destino (i.e. Tempo de vida do pacote expirado)
+	- O Gateway não consegue retransmitir os pacotes na frequência adequada (i.e. Gateway congestionado)
+	- O Roteador ou Encaminhador indica uma rota melhor para a máquina a enviar pacotes.
+
+### Loopback Interface
+
+A loopback interface is a virtual interface in our network device that is always up and active after it has been configured. Like our physical interface, we assign a special IP address which is called a loopback address or loopback IP address.
+
+Loopback interfaces should be supported on all Cisco platforms, and unlike subinterfaces, loopback interfaces are independent of the state of any physical interface. Most IP implementations support a loopback interface (lo0) to represent the loopback facility. Any traffic that a computer program sends on the loopback network is addressed to the same computer.
+
+The loopback interface can be considered stable because once you enable it, it will remain up until you issue the shutdown command under its interface configuration mode. It’s very useful when you want a single IP address as a reference that is independent of the status of any physical interfaces in the networking device.
+
+A loopback interface can be used to establish a Telnet session from the console port of the device to its auxiliary port when all other interfaces are down. --> relembrar aula anterior
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
