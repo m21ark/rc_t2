@@ -2,16 +2,18 @@
 #include "URL.h"
 #include "file.h"
 
-int main(int argc, char * argv[])
+int main(int argc, char *argv[])
 {
-    if (argc != 2) {
+    if (argc != 2)
+    {
         fprintf(stderr, "usage: ./download ftp://[<user>:<password>@]<host>/<url-path>\n");
         exit(1);
     }
-    
+
     url urlStruct;
 
-    if (parseURL(argv[1], &urlStruct) != 0) {
+    if (parseURL(argv[1], &urlStruct) != 0)
+    {
         fprintf(stderr, "There was an error parssing the url");
         exit(1);
     }
@@ -22,8 +24,6 @@ int main(int argc, char * argv[])
         fprintf(stderr, "Something failed when downloading file");
         exit(1);
     }
-    
 
     return 0;
-
 }

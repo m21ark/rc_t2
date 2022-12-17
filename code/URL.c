@@ -6,7 +6,6 @@ int parseURL(const char *urlString, url *urlStruct)
 
     regex_t regexCompiled;
     regmatch_t groupArray[maxGroups];
-    int reti;
     char *re = "ftp://(([a-z0-9]+):([a-z0-9]+)@)?([\\.a-z0-9]+)/([\\./a-z0-9-]+)$";
 
     printf("HERE\n");
@@ -19,20 +18,19 @@ int parseURL(const char *urlString, url *urlStruct)
 
     if (regexec(&regexCompiled, urlString, maxGroups, groupArray, 0) == 0)
     {
-    printf("HERE\n");
 
         unsigned int g = 0, optional = 0;
         for (g = 0; g < maxGroups; g++)
         {
             optional = 0;
-            if (groupArray[g].rm_so == (size_t)-1)
+            if (groupArray[g].rm_so == (int)(size_t)-1)
                 optional = 1; // No more groups
 
             char sourceCopy[strlen(urlString) + 1];
             strcpy(sourceCopy, urlString);
             sourceCopy[groupArray[g].rm_eo] = 0;
 
-            if (optional) 
+            if (optional)
             {
                 if (g == 2)
                     strcpy(urlStruct->user, "anonymous");
@@ -59,4 +57,3 @@ int parseURL(const char *urlString, url *urlStruct)
     regfree(&regexCompiled);
     return 0;
 }
-
